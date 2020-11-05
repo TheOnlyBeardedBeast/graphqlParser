@@ -13,11 +13,6 @@ namespace graphqlParser
         public string Type { get; set; }
         public TypeDefinitionField InnerType { get; set; }
         public string Name { get; set; }
-
-        public override string ToString()
-        {
-            return (this.IsList ? $"List<{this.InnerType.ToString()}>" : CodeBuilder.ScalarMap.FirstOrDefault(e => e.Key == this.Type).Value ?? this.Type) + (string.IsNullOrEmpty(this.Name) ? "" : $" {this.Name}" + (string.IsNullOrEmpty(this.Type) && !this.IsList ? ",\n" : " { get; set; }\n"));
-        }
     }
     public class TypeDefinitionItem
     {
@@ -362,7 +357,7 @@ namespace graphqlParser
         }
 
         // helpers
-        public TypeDefinitionField TransformTypeField(ITypeNode type, TypeDefinitionField context, bool nullable = false)
+        protected TypeDefinitionField TransformTypeField(ITypeNode type, TypeDefinitionField context, bool nullable = false)
         {
             var ctx = context ?? new TypeDefinitionField();
 
@@ -454,22 +449,16 @@ namespace graphqlParser
             });
         }
 
-        public string ScopeStart()
-        {
-            return "{";
-        }
+        public string ScopeStart = "{";
 
-        public string ScopeEnd()
-        {
-            return "}";
-        }
+        public string ScopeEnd = "}";
 
-        public string Indent()
-        {
-            return "    ";
-        }
+        public string Indent = "    ";
+
 
         public string InterfaceSuffix = "{ get; set; };";
+
+        public string classSuffix = "{ get; set; };";
 
         public string EnumSuffix = ",";
 
@@ -517,28 +506,28 @@ namespace graphqlParser
         protected void RenderEnum(StringBuilder sb, TypeDefinitionItem item)
         {
             sb.AppendLine($"public enum {item.Name}");
-            sb.AppendLine(this.ScopeStart());
+            sb.AppendLine(this.ScopeStart);
             item.Fields.ForEach(field => this.RenderEnumField(sb, field));
-            sb.AppendLine(this.ScopeEnd());
+            sb.AppendLine(this.ScopeEnd);
         }
 
         protected void RenderEnumField(StringBuilder sb, TypeDefinitionField field)
         {
-            sb.AppendLine($"{this.Indent()}{field.Name}{this.EnumSuffix}");
+            sb.AppendLine($"{this.Indent}{field.Name}{this.EnumSuffix}");
         }
         // #endregion Enums
         // #region interfaces
         protected void RenderInterface(StringBuilder sb, TypeDefinitionItem item)
         {
             sb.AppendLine($"public interface {item.Name}");
-            sb.AppendLine(this.ScopeStart());
+            sb.AppendLine(this.ScopeStart);
             item.Fields.ForEach(field => this.RenderInterfaceField(sb, field));
-            sb.AppendLine(this.ScopeEnd());
+            sb.AppendLine(this.ScopeEnd);
         }
 
         protected void RenderInterfaceField(StringBuilder sb, TypeDefinitionField field)
         {
-            sb.AppendLine($"{this.Indent()}{this.RenderFieldType(field)} {field.Name} {InterfaceSuffix}");
+            sb.AppendLine($"{this.Indent}{this.RenderFieldType(field)} {field.Name} {InterfaceSuffix}");
         }
         // #endregion interfaces
         // #region Type
@@ -546,9 +535,9 @@ namespace graphqlParser
         {
             sb.Append($"public class {item.Name}");
             RenderTypeImplements(sb, item);
-            sb.AppendLine(this.ScopeStart());
+            sb.AppendLine(this.ScopeStart);
             item.Fields.ForEach(field => this.RenderTypeField(sb, field));
-            sb.AppendLine(this.ScopeEnd());
+            sb.AppendLine(this.ScopeEnd);
         }
 
         protected void RenderTypeImplements(StringBuilder sb, TypeDefinitionItem item)
@@ -562,7 +551,7 @@ namespace graphqlParser
 
         protected void RenderTypeField(StringBuilder sb, TypeDefinitionField field)
         {
-            sb.AppendLine($"{this.Indent()}public {this.RenderFieldType(field)} {field.Name} {InterfaceSuffix}");
+            sb.AppendLine($"{this.Indent}public {this.RenderFieldType(field)} {field.Name} {InterfaceSuffix}");
         }
     }
     public static class CodeBuilder
