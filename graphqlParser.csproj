@@ -7,6 +7,13 @@
 
   <ItemGroup>
     <PackageReference Include="HotChocolate.Language" Version="10.5.3" />
+    <PackageReference Include="RazorEngine" Version="3.10.0" />
+    <PackageReference Include="Humanizer" Version="2.8.26" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="RenderViews\TypeTemplate.cs">
+      <DependentUpon>TypeTemplate.cshtml</DependentUpon>
+    </Compile>
+  </ItemGroup>
 </Project>

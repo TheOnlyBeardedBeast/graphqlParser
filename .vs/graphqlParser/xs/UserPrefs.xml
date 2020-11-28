@@ -1,0 +1,28 @@
+﻿<Properties StartupConfiguration="{09CA5806-29D3-4A13-91A9-C8A5B7D6746C}|Default">
+  <MonoDevelop.Ide.Workbench ActiveDocument="readme.md">
+    <Files>
+      <File FileName="Visitor.cs" Line="199" Column="13" />
+      <File FileName="Program.cs" Line="170" Column="62" />
+      <File FileName="graphqlParser.csproj" Line="1" Column="1" />
+      <File FileName="readme.md" Line="170" Column="62" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="graphqlParser" expanded="True">
+            <Node name="graphqlParser" expanded="True">
+              <Node name="readme.md" selected="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.ItemProperties.graphqlParser PreferredExecutionTarget="MonoDevelop.Default" />
+</Properties>

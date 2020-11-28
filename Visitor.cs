@@ -3,6 +3,7 @@ using HotChocolate.Language;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Humanizer;
 
 namespace graphqlParser
 {
@@ -13,6 +14,7 @@ namespace graphqlParser
         public string Type { get; set; }
         public TypeDefinitionField InnerType { get; set; }
         public string Name { get; set; }
+        public List<string> Directives { get; } = new List<string>();
     }
     public class TypeDefinitionItem
     {
@@ -20,6 +22,7 @@ namespace graphqlParser
         public TypeDefinitionType Type { get; set; }
         public List<TypeDefinitionField> Fields { get; } = new List<TypeDefinitionField>();
         public List<string> InterfaceKeys { get; } = new List<string>();
+        public List<string> Directives { get; } = new List<string>();
     }
 
     public enum TypeDefinitionType
@@ -195,16 +198,21 @@ namespace graphqlParser
         {
             var item = new TypeDefinitionItem { Name = node.Name.ToString(), Type = TypeDefinitionType.Type };
 
-            List<string> intfaces = new List<string>();
             using (var interfaces = node.Interfaces.GetEnumerator())
             {
                 while (interfaces.MoveNext())
                 {
-                    intfaces.Add(interfaces.Current.Name.Value);
+                    item.InterfaceKeys.Add(interfaces.Current.Name.Value);
                 }
             }
 
-            item.InterfaceKeys.AddRange(intfaces);
+            using (var directives = node.Directives.GetEnumerator())
+            {
+                while (directives.MoveNext())
+                {
+                    item.Directives.Add(directives.Current.Name.Value);
+                }
+            }
 
             VisitName(node.Name, context);
             VisitIfNotNull(node.Description, context, VisitStringValue);
@@ -494,6 +502,8 @@ namespace graphqlParser
                 sb.AppendLine();
             });
 
+            this.RenderDbcontext(sb, this.VisitedItems.Where(e => e.Directives.Contains("entity") && e.Type == TypeDefinitionType.Type));
+
             return sb.ToString();
         }
 
@@ -513,7 +523,7 @@ namespace graphqlParser
 
         protected void RenderEnumField(StringBuilder sb, TypeDefinitionField field)
         {
-            sb.AppendLine($"{this.Indent}{field.Name}{this.EnumSuffix}");
+            sb.AppendLine($"{this.Indent}{CodeBuilder.Capitalize(field.Name)}{this.EnumSuffix}");
         }
         // #endregion Enums
         // #region interfaces
@@ -527,7 +537,7 @@ namespace graphqlParser
 
         protected void RenderInterfaceField(StringBuilder sb, TypeDefinitionField field)
         {
-            sb.AppendLine($"{this.Indent}{this.RenderFieldType(field)} {field.Name} {InterfaceSuffix}");
+            sb.AppendLine($"{this.Indent}{this.RenderFieldType(field)} {CodeBuilder.Capitalize(field.Name)} {InterfaceSuffix}");
         }
         // #endregion interfaces
         // #region Type
@@ -551,8 +561,29 @@ namespace graphqlParser
 
         protected void RenderTypeField(StringBuilder sb, TypeDefinitionField field)
         {
-            sb.AppendLine($"{this.Indent}public {this.RenderFieldType(field)} {field.Name} {InterfaceSuffix}");
+            sb.AppendLine($"{this.Indent}public {this.RenderFieldType(field)} {CodeBuilder.Capitalize(field.Name)} {InterfaceSuffix}");
         }
+        // #endregion
+        // #region dbcontext
+        protected void RenderDbcontext(StringBuilder sb, IEnumerable<TypeDefinitionItem> items)
+        {
+            sb.AppendLine("using Microsoft.EntityFrameworkCore;");
+            sb.AppendLine();
+
+            sb.AppendLine($"public class AppDBContext : DbContext");
+            sb.AppendLine(this.ScopeStart);
+            foreach(var item in items)
+            {
+                RenderDbcontextSet(sb, item);
+            }
+            sb.AppendLine(this.ScopeEnd);
+        }
+
+        protected void RenderDbcontextSet(StringBuilder sb, TypeDefinitionItem item)
+        {
+            sb.AppendLine($"  public DbSet<{item.Name}> {item.Name.Pluralize(true)} {{ get; set; }}");
+        }
+        // #endregion
     }
     public static class CodeBuilder
     {
@@ -572,6 +603,21 @@ namespace graphqlParser
             {"Uuid","Guid"},
             {"Any","object"}
         };
+
+        public static string Capitalize(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return text;
+            }
+
+            if(text.Length == 1)
+            {
+                return char.ToUpper(text[0]).ToString();
+            }
+
+            return char.ToUpper(text[0]) + text.Substring(1);
+        }
 
 
 

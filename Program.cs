@@ -12,7 +12,7 @@ namespace graphqlParser
     {
         static void Main(string[] args)
         {
-
+            
             var query = @"
                 schema {
                   query: Query
@@ -64,7 +64,7 @@ namespace graphqlParser
                   CUBIT @deprecated(reason: ""Test deprecated enum case"")
                 }
                 # A humanoid creature from the Star Wars universe
-                type Human implements Character {
+                type Human implements Character @entity{
                   # The ID of the human
                   id: ID!
                   # What this human calls themselves
@@ -76,55 +76,55 @@ namespace graphqlParser
                   # Mass in kilograms, or null if unknown
                   mass: Float
                   # This human's friends, or an empty list if they have none
-                  friends: [Character]
+                  friends: [Character] @relation
                   # The friends of the human exposed as a connection with edges
                   friendsConnection(first: Int, after: ID): FriendsConnection!
                   # The movies this human appears in
-                  appearsIn: [Episode]!
+                  appearsIn: [Episode]! @relation
                   # A list of starships this person has piloted, or an empty list if none
-                  starships: [Starship]
+                  starships: [Starship] @relation
                 }
                 # An autonomous mechanical character in the Star Wars universe
-                type Droid implements Character {
+                type Droid implements Character @entity{
                   # The ID of the droid
                   id: ID!
                   # What others call this droid
                   name: String!
                   # This droid's friends, or an empty list if they have none
-                  friends: [Character]
+                  friends: [Character] @relation
                   # The friends of the droid exposed as a connection with edges
                   friendsConnection(first: Int, after: ID): FriendsConnection!
                   # The movies this droid appears in
-                  appearsIn: [Episode]!
+                  appearsIn: [Episode]! @relation
                   # This droid's primary function
                   primaryFunction: String
                 }
                 # A connection object for a character's friends
-                type FriendsConnection {
+                type FriendsConnection @entity{
                   # The total number of friends
                   totalCount: Int
                   # The edges for each of the character's friends.
                   edges: [FriendsEdge]
                   # A list of the friends, as a convenience when edges are not needed.
-                  friends: [Character]
+                  friends: [Character] @relation
                   # Information for paginating this connection
                   pageInfo: PageInfo!
                 }
                 # An edge object for a character's friends
-                type FriendsEdge {
+                type FriendsEdge @entity{
                   # A cursor used for pagination
                   cursor: ID!
                   # The character represented by this friendship edge
                   node: Character
                 }
                 # Information for paginating this connection
-                type PageInfo {
+                type PageInfo @entity{
                   startCursor: ID
                   endCursor: ID
                   hasNextPage: Boolean!
                 }
                 # Represents a review for a movie
-                type Review {
+                type Review @entity{
                   # The number of stars this review gave, 1-5
                   stars: Int!
                   # Comment about the movie
@@ -145,7 +145,7 @@ namespace graphqlParser
                   green: Int!
                   blue: Int!
                 }
-                type Starship {
+                type Starship @entity{
                   # The ID of the starship
                   id: ID!
                   # The name of the starship
@@ -155,7 +155,7 @@ namespace graphqlParser
                   coordinates: [[Float!]!]
                 }
 
-                extend type Starship{
+                extend type Starship {
                   speed: Float
                 }
 
@@ -180,7 +180,7 @@ namespace graphqlParser
 
             System.Console.WriteLine(new CodeRewriter(walker.VisitedItems).Transform());
 
-            System.Console.WriteLine(json);
+            // System.Console.WriteLine(json);
         }
     }
 }
